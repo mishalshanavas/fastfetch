@@ -1,0 +1,7 @@
+name: Validate musl runner
+on: push
+permissions:
+  contents: read
+jobs:
+  musl:
+    uses: ./.github/workflows/build-musl-amd64.yml
