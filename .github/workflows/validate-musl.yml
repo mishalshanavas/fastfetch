@@ -3,5 +3,25 @@ on: push
 permissions:
   contents: read
 jobs:
-  musl:
-    uses: ./.github/workflows/build-musl-amd64.yml
+  sudo-inputs:
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            expected: preserved
+          - runner: ubuntu-26.04
+            expected: dropped
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Check input preservation used by setup-alpine
+        env:
+          INPUT_APK_TOOLS_URL: validation-sentinel
+          EXPECTED: ${{ matrix.expected }}
+        run: |
+          if sudo -E sh -c 'test "${INPUT_APK_TOOLS_URL:-}" = validation-sentinel'; then
+            actual=preserved
+          else
+            actual=dropped
+          fi
+          echo "Input environment: $actual; expected: $EXPECTED"
+          test "$actual" = "$EXPECTED"
